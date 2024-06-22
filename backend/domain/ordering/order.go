@@ -2,7 +2,6 @@ package ordering
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +19,7 @@ type Order struct {
 	PaymentID  uuid.UUID `bson:"payment_id"`
 	Price      float64   `bson:"price"`
 	IsPaid     bool      `bson:"is_paid"`
-	CreatedAt  time.Time `bson:"created_at"`
+	CreatedAt  string    `bson:"created_at"`
 }
 
 func NewOrder(customer_id, product_id uuid.UUID) Order {

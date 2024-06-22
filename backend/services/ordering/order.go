@@ -29,7 +29,7 @@ func (srv orderingService) CreateNewOrder(new_order domain.OrderCreated) (domain
 		return domain.OrderBase{}, err
 	}
 	order := domain.NewOrder(customer_id, product_id)
-	order.CreatedAt = time.Now()
+	order.CreatedAt = time.Now().Format("2006-1-2 15:04:05")
 	//product price must assing below before saving data
 	err = srv.order_repository.Save(order)
 	if err != nil {
