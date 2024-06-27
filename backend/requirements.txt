@@ -1,2 +1,7 @@
 fastapi[all]
 uvicorn[standard]
+
+databases[postgresql]
+SQLAlchemy
+alembic
+psycopg2-binary
