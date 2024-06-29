@@ -8,6 +8,7 @@ type Order struct {
 	ProductSKU  string    `db:"product_sku"`
 	ProductCost float64   `db:"product_cost"`
 	Duration    int       `db:"duration"`
+	PaymentID   int       `db:"payment_id"`
 	CreatedAt   time.Time `db:"created_at"`
 }
 

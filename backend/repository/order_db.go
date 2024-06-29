@@ -15,13 +15,14 @@ func NewOrderRepositoryDB(db *sqlx.DB) OrderRepository {
 
 // CreateNewOrder implements OrderRepository.
 func (repo orderRepositoryDB) CreateNewOrder(entity Order) (*Order, error) {
-	query := "INSERT INTO orders (customer_id, product_sku, product_cost, duration, created_at) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO orders (customer_id, product_sku, product_cost, duration, payment_id, created_at) VALUES (?, ?, ?, ?, ?, ?)"
 	result, err := repo.db.Exec(
 		query,
 		entity.CustomerID,
 		entity.ProductSKU,
 		entity.ProductCost,
 		entity.Duration,
+		entity.PaymentID,
 		entity.CreatedAt,
 	)
 	if err != nil {
@@ -38,7 +39,7 @@ func (repo orderRepositoryDB) CreateNewOrder(entity Order) (*Order, error) {
 // FromOrderID implements OrderRepository.
 func (repo orderRepositoryDB) FromOrderID(orderID int) (*Order, error) {
 	var order Order
-	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, created_at FROM orders WHERE order_id=?"
+	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, created_at FROM orders WHERE order_id=?"
 	if err := repo.db.Get(&order, query, orderID); err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (repo orderRepositoryDB) FromOrderID(orderID int) (*Order, error) {
 // GetAllOrder implements OrderRepository.
 func (repo orderRepositoryDB) GetAllOrder() ([]Order, error) {
 	var orders []Order
-	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, created_at FROM orders"
+	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, created_at FROM orders"
 	if err := repo.db.Select(&orders, query); err != nil {
 		return nil, err
 	}

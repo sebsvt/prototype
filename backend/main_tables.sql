@@ -16,11 +16,23 @@ create table nodes (
 
 drop table if exists `orders`;
 create table orders (
-    order_id int not null,
+    order_id int auto_increment primary key,
     customer_id int not null,
     product_sku varchar(255) not null,
     product_cost decimal(10, 2) not null,
     duration int not null,
-    created_at datetime not null,
-    primary key (order_id)
+    payment_id int not null,
+    created_at datetime not null
+);
+
+drop table if exists `payments`;
+create table payments (
+    payment_id int auto_increment primary key,
+    sender varchar(255) not null,
+    receiver varchar(255) not null,
+    amount decimal(10, 2) not null,
+    is_verified boolean not null,
+    transaction_ref varchar(255) not null,
+    transaction_time_stamp varchar(255) not null,
+    created_at datetime not null
 );

@@ -21,10 +21,15 @@ func (srv orderService) CreateNewOrder(entity OrderRequest) (*OrderResponse, err
 		ProductSKU:  entity.ProductSKU,
 		ProductCost: entity.ProductCost,
 		Duration:    entity.Duration,
+		PaymentID:   1,
 		CreatedAt:   time.Now(),
 	})
 	if err != nil {
 		return nil, err
+	}
+	is_paid := true
+	if order.PaymentID == 2 {
+		is_paid = false
 	}
 	return &OrderResponse{
 		OrderID:     order.OrderID,
@@ -33,6 +38,7 @@ func (srv orderService) CreateNewOrder(entity OrderRequest) (*OrderResponse, err
 		ProductCost: order.ProductCost,
 		Duration:    order.Duration,
 		TotalCost:   order.ProductCost * float64(order.Duration),
+		IsPaid:      is_paid,
 		CreatedAt:   order.CreatedAt,
 	}, nil
 }

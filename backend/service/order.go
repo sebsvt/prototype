@@ -16,6 +16,7 @@ type OrderResponse struct {
 	ProductCost float64   `json:"product_cost"`
 	Duration    int       `json:"duration"`
 	TotalCost   float64   `json:"total_cost"`
+	IsPaid      bool      `json:"is_paid"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

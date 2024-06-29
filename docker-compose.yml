@@ -1,26 +1,24 @@
 version: "3.9"
 
 services:
-  server:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    volumes:
-      - ./backend/:/backend/
-    command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
+  # server:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./backend/:/backend/
+  #   command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
+  #   env_file:
+  #     - ./backend/.env
+  #   ports:
+  #     - 8000:8000
+
+  mariadb:
+    image: mariadb
+    container_name: mariadb
     env_file:
       - ./backend/.env
     ports:
-      - 8000:8000
-
-  db:
-    image: postgres:latest
+      - 3306:3306
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./backend/.env
-    ports:
-      - 5432:5432
-
-volumes:
-  postgres_data:
+      - ./data/mariadb:/var/lib/mysql

@@ -12,15 +12,52 @@ func NewPaymentRepositoryDB(db *sqlx.DB) PaymentRepository {
 
 // CreateNewPayment implements PaymentRepository.
 func (repo paymentRepositoryDB) CreateNewPayment(entity Payment) (int, error) {
-	panic("unimplemented")
+	query := "insert into payments (sender, receiver, amount, is_verified, transaction_ref, transaction_time_stamp, created_at) values (?, ?, ?, ?, ?, ?, ?)"
+	result, err := repo.db.Exec(
+		query,
+		entity.Sender,
+		entity.Receiver,
+		entity.Amount,
+		entity.IsVerified,
+		entity.TransactionRef,
+		entity.TransactionTimeStamp,
+		entity.CreatedAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+	payment_id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return int(payment_id), nil
 }
 
 // FromPaymentID implements PaymentRepository.
 func (repo paymentRepositoryDB) FromPaymentID(payment_id int) (*Payment, error) {
-	panic("unimplemented")
+	var payment Payment
+	query := "select payment_id, sender, receiver, amount, is_verified, transaction_ref, transaction_time_stamp, created_at from payments where payment_id=?"
+	if err := repo.db.Get(&payment, query, payment_id); err != nil {
+		return nil, err
+	}
+	return &payment, nil
 }
 
 // UpdatePayment implements PaymentRepository.
 func (repo paymentRepositoryDB) UpdatePayment(entity Payment) error {
-	panic("unimplemented")
+	query := `update payments
+		set sender=?, receiver=?, amount=?, is_verified=?, transaction_ref=?, transaction_time_stamp=?, created_at=?
+		where payment_id=?`
+	_, err := repo.db.Exec(
+		query,
+		entity.Sender,
+		entity.Receiver,
+		entity.Amount,
+		entity.IsVerified,
+		entity.TransactionRef,
+		entity.TransactionTimeStamp,
+		entity.CreatedAt,
+		entity.PaymentID,
+	)
+	return err
 }

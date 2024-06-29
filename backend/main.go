@@ -18,9 +18,14 @@ func main() {
 	node_repo := repository.NewNodeRepositoryDB(db)
 	node_serv := service.NewNodeService(node_repo)
 	node_rest := rest.NewNodeRestAPI(node_serv)
+
 	order_repo := repository.NewOrderRepositoryDB(db)
 	order_serv := service.NewOrderService(order_repo)
 	order_rest := rest.NewOrderRestAPI(order_serv)
+
+	payment_repo := repository.NewPaymentRepositoryDB(db)
+	payment_serv := service.NewPaymentService(payment_repo)
+	payment_rest := rest.NewPaymentRestAPI(payment_serv)
 
 	api := app.Group("/api")
 
@@ -32,8 +37,8 @@ func main() {
 	api.Get("order/", order_rest.GetAllOrders)
 	api.Post("order/create", order_rest.CreateNewOrder)
 
-	api.Post("payments/", func(c *fiber.Ctx) error {
-		return nil
-	})
+	api.Post("payments/", payment_rest.CreatePayment)
+	api.Get("/payments/:payment_id", payment_rest.GetPaymentFromID)
+
 	app.Listen(":8000")
 }
