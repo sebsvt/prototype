@@ -7,29 +7,33 @@ import (
 )
 
 type orderService struct {
-	order_repo repository.OrderRepository
+	order_repo      repository.OrderRepository
+	payment_service PaymentService
 }
 
-func NewOrderService(order_repo repository.OrderRepository) OrderService {
-	return orderService{order_repo: order_repo}
+func NewOrderService(order_repo repository.OrderRepository, payment_srv PaymentService) OrderService {
+	return orderService{order_repo: order_repo, payment_service: payment_srv}
 }
 
 // CreateNewOrder implements OrderService.
 func (srv orderService) CreateNewOrder(entity OrderRequest) (*OrderResponse, error) {
+	new_payment := PaymentRequest{
+		Amount: entity.ProductCost * float64(entity.Duration),
+	}
+	payment_id, err := srv.payment_service.CreateNewPayment(new_payment)
+	if err != nil {
+		return nil, err
+	}
 	order, err := srv.order_repo.CreateNewOrder(repository.Order{
 		CustomerID:  entity.CustomerID,
 		ProductSKU:  entity.ProductSKU,
 		ProductCost: entity.ProductCost,
 		Duration:    entity.Duration,
-		PaymentID:   1,
+		PaymentID:   payment_id,
 		CreatedAt:   time.Now(),
 	})
 	if err != nil {
 		return nil, err
-	}
-	is_paid := true
-	if order.PaymentID == 2 {
-		is_paid = false
 	}
 	return &OrderResponse{
 		OrderID:     order.OrderID,
@@ -38,7 +42,7 @@ func (srv orderService) CreateNewOrder(entity OrderRequest) (*OrderResponse, err
 		ProductCost: order.ProductCost,
 		Duration:    order.Duration,
 		TotalCost:   order.ProductCost * float64(order.Duration),
-		IsPaid:      is_paid,
+		IsPaid:      false,
 		CreatedAt:   order.CreatedAt,
 	}, nil
 }
