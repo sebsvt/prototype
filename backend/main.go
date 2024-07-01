@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -11,7 +14,14 @@ import (
 )
 
 func main() {
-	db, err := sqlx.Open("mysql", "root:root@tcp(localhost:3306)/prototype?parseTime=true")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := "root"
+	dbPassword := os.Getenv("MARIADB_ROOT_PASSWORD")
+	dbName := os.Getenv("MARIADB_DATABASE")
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbPort, dbName)
+	db, err := sqlx.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
 	}

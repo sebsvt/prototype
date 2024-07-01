@@ -1,17 +1,17 @@
 version: "3.9"
 
 services:
-  # server:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./backend/:/backend/
-  #   command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
-  #   env_file:
-  #     - ./backend/.env
-  #   ports:
-  #     - 8000:8000
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/:/backend/
+    command: go run main.go -b 0.0.0.0
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
 
   mariadb:
     image: mariadb
