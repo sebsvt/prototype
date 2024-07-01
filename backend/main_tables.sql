@@ -36,3 +36,13 @@ create table payments (
     transaction_time_stamp varchar(255) not null,
     created_at datetime not null
 );
+
+drop table if exists `products`;
+create table products (
+    product_id int auto_increment primary key,
+    sku varchar(255) not null,
+    name varchar(255) not null,
+    description text,
+    price decimal(10, 2) not null,
+    is_available boolean not null
+);

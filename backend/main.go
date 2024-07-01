@@ -45,11 +45,11 @@ func main() {
 	api.Post("order/create", order_rest.CreateNewOrder)
 
 	api.Post("payments/", payment_rest.CreatePayment)
-	api.Get("/payments/:payment_id", payment_rest.GetPaymentFromID)
+	api.Get("payments/:payment_id", payment_rest.GetPaymentFromID)
 
-	api.Get("/products/", product_rest.GetAllProducts)
-	api.Get("/products/:product_id", payment_rest.GetPaymentFromID)
-	api.Get("/products/", product_rest.CreateNewProduct)
+	api.Get("products/", product_rest.GetAllProducts)
+	api.Get("products/:product_id", product_rest.GetProductFromID)
+	api.Post("products/", product_rest.CreateNewProduct)
 
 	app.Listen(":8000")
 }
