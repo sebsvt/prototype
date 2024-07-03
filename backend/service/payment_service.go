@@ -1,7 +1,12 @@
 package service
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"log"
+	"mime/multipart"
+	"net/http"
 	"time"
 
 	"github.com/sebsvt/prototype/repository"
@@ -62,4 +67,47 @@ func (srv paymentService) VerifyPayment(paymend_id int) error {
 		return err
 	}
 	return nil
+}
+
+func (srv paymentService) CheckPaymentSlip(orderID int, fileData []byte) (bool, error) {
+	url := "https://api.slipok.com/api/line/apikey/24601"
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+
+	part, err := writer.CreateFormFile("files", "slip.jpg")
+	if err != nil {
+		return false, err
+	}
+	part.Write(fileData)
+
+	writer.Close()
+
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("x-authorization", "SLIPOKI4OA2T2") // Set your actual key here
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return false, err
+	}
+
+	log.Println(result)
+	success, ok := result["success"].(bool)
+	if !ok {
+		return false, errors.New("unexpected response format")
+	}
+
+	return success, nil
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import ModeToggle from "../mode-toggle";
 import Link from "next/link";
+import UserButton from "../user-button";
 
 export const Navigation = () => {
   return (
@@ -80,6 +81,7 @@ export const Navigation = () => {
             <span className="sr-only">GitHub</span>
           </div>
           <ModeToggle />
+          <UserButton />
         </div>
       </div>
     </header>

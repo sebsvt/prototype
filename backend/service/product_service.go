@@ -1,6 +1,8 @@
 package service
 
-import "github.com/sebsvt/prototype/repository"
+import (
+	"github.com/sebsvt/prototype/repository"
+)
 
 type productService struct {
 	product_repo repository.ProductRepository

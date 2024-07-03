@@ -22,6 +22,7 @@ create table orders (
     product_cost decimal(10, 2) not null,
     duration int not null,
     payment_id int not null,
+    is_paid boolean not null,
     created_at datetime not null
 );
 
@@ -45,4 +46,14 @@ create table products (
     description text,
     price decimal(10, 2) not null,
     is_available boolean not null
+);
+
+drop table if exists `users`;
+create table users (
+    user_id int auto_increment primary key,
+    firstname varchar(255) not null,
+    lastname varchar(255) not null,
+    email varchar(255) not null unique,
+    hashed_password varchar(255) not null,
+    created_at datetime not null
 );

@@ -28,6 +28,11 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	auth_serv := service.NewAuthService()
+	user_repo := repository.NewUserRepository(db)
+	user_serv := service.NewUserService(user_repo, auth_serv)
+	user_rest := rest.NewUserRestAPI(user_serv)
+
 	node_repo := repository.NewNodeRepositoryDB(db)
 	node_serv := service.NewNodeService(node_repo)
 	node_rest := rest.NewNodeRestAPI(node_serv)
@@ -38,7 +43,7 @@ func main() {
 
 	order_repo := repository.NewOrderRepositoryDB(db)
 	order_serv := service.NewOrderService(order_repo, payment_serv)
-	order_rest := rest.NewOrderRestAPI(order_serv)
+	order_rest := rest.NewOrderRestAPI(order_serv, user_serv)
 
 	product_repo := repository.NewProductRepositoryDB(db)
 	product_serv := service.NewProductService(product_repo)
@@ -53,6 +58,7 @@ func main() {
 	api.Get("order/:order_id", order_rest.FromOrderID)
 	api.Get("order/", order_rest.GetAllOrders)
 	api.Post("order/create", order_rest.CreateNewOrder)
+	api.Put("order/:order_id/checkout", order_rest.CheckOut)
 
 	api.Post("payments/", payment_rest.CreatePayment)
 	api.Get("payments/:payment_id", payment_rest.GetPaymentFromID)
@@ -60,6 +66,12 @@ func main() {
 	api.Get("products/", product_rest.GetAllProducts)
 	api.Get("products/:product_id", product_rest.GetProductFromID)
 	api.Post("products/", product_rest.CreateNewProduct)
+
+	// api.Get("/users/:user_id", user_rest.GetUserFromID)
+	api.Post("/users/sign-up", user_rest.Register)
+	api.Post("/users/sign-in", user_rest.Login)
+	api.Get("/users/current_user", user_rest.GetCurrentUser)
+	api.Get("/users/:user_id", user_rest.GetUserFromID)
 
 	app.Listen(":8000")
 }

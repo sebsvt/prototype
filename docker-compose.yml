@@ -7,7 +7,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend/:/backend/
-    command: go run main.go -b 0.0.0.0
+    # command: go run main.go -b 0.0.0.0
+    command: air main.go -b 0.0.0.0
     env_file:
       - ./backend/.env
     ports:

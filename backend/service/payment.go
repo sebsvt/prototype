@@ -21,4 +21,5 @@ type PaymentService interface {
 	CreateNewPayment(payment PaymentRequest) (int, error)
 	FromPaymentID(payment_id int) (*PaymentResponse, error)
 	VerifyPayment(paymend_id int) error
+	CheckPaymentSlip(orderID int, fileData []byte) (bool, error)
 }

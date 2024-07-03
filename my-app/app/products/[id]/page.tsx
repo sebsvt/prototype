@@ -1,7 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import React from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 interface Product {
   product_id: number;
@@ -12,17 +15,76 @@ interface Product {
   is_available: boolean;
 }
 
-async function getProduct(product_id: number) {
-  const res = await fetch(`http://localhost:8000/api/products/${product_id}`);
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  }
-  const product: Product = await res.json();
-  return product;
-}
+const Page = ({ params }: { params: { id: number } }) => {
+  const router = useRouter();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [duration, setDuration] = useState<number>(1);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
-const Page = async ({ params }: { params: { id: number } }) => {
-  const product = await getProduct(params.id);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/products/${params.id}`
+        );
+        if (!res.ok) {
+          throw new Error("Failed to fetch");
+        }
+        const product: Product = await res.json();
+        setProduct(product);
+        setTotalPrice(product.price);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [params.id]);
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = Cookies.get("access_token");
+    if (!token) {
+      console.error("No access token found");
+      return;
+    }
+
+    const orderData = {
+      customer_id: 1, // Mocked customer ID
+      product_sku: product?.sku,
+      product_cost: product?.price,
+      duration: duration,
+    };
+    try {
+      const res = await fetch("http://localhost:8000/api/order/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to create order");
+      }
+      const order = await res.json();
+      router.push(`/order/${order.order_id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
+
   return (
     <main className="container mx-auto w-full py-6">
       <section className="mt-6">
@@ -46,7 +108,7 @@ const Page = async ({ params }: { params: { id: number } }) => {
                 <h2 className="text-2xl font-bold mb-4">{product.name}</h2>
               </section>
               <section className="body">
-                <p className="mb-4 text-muted-foreground ">
+                <p className="mb-4 text-muted-foreground">
                   {product.description} Lorem ipsum dolor, sit amet consectetur
                   adipisicing elit. Aliquam ut error excepturi natus velit autem
                   molestiae minima laboriosam impedit dolorum sunt sequi
@@ -59,9 +121,13 @@ const Page = async ({ params }: { params: { id: number } }) => {
                     type="number"
                     placeholder="duration times"
                     defaultValue={1}
+                    onChange={(e) => {
+                      setDuration(Number(e.target.value));
+                      setTotalPrice(Number(e.target.value) * product.price);
+                    }}
                   />
                   <p className="text-xl font-semibold mt-4">
-                    ${product.price.toFixed(2)}
+                    ${totalPrice.toFixed(2)}
                   </p>
                   <span className="text-sm text-muted-foreground">
                     Monthly payment
@@ -70,7 +136,11 @@ const Page = async ({ params }: { params: { id: number } }) => {
               </section>
             </div>
             <section className="footer mt-4">
-              <Button className="w-full">Buy</Button>
+              <form onSubmit={handleOrderSubmit}>
+                <Button type="submit" className="w-full">
+                  Buy
+                </Button>
+              </form>
             </section>
           </div>
         </div>

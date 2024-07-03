@@ -15,7 +15,7 @@ func NewOrderRepositoryDB(db *sqlx.DB) OrderRepository {
 
 // CreateNewOrder implements OrderRepository.
 func (repo orderRepositoryDB) CreateNewOrder(entity Order) (*Order, error) {
-	query := "INSERT INTO orders (customer_id, product_sku, product_cost, duration, payment_id, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO orders (customer_id, product_sku, product_cost, duration, payment_id, is_paid, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	result, err := repo.db.Exec(
 		query,
 		entity.CustomerID,
@@ -23,6 +23,7 @@ func (repo orderRepositoryDB) CreateNewOrder(entity Order) (*Order, error) {
 		entity.ProductCost,
 		entity.Duration,
 		entity.PaymentID,
+		entity.IsPaid,
 		entity.CreatedAt,
 	)
 	if err != nil {
@@ -39,7 +40,7 @@ func (repo orderRepositoryDB) CreateNewOrder(entity Order) (*Order, error) {
 // FromOrderID implements OrderRepository.
 func (repo orderRepositoryDB) FromOrderID(orderID int) (*Order, error) {
 	var order Order
-	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, created_at FROM orders WHERE order_id=?"
+	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, is_paid, created_at FROM orders WHERE order_id=?"
 	if err := repo.db.Get(&order, query, orderID); err != nil {
 		return nil, err
 	}
@@ -47,11 +48,31 @@ func (repo orderRepositoryDB) FromOrderID(orderID int) (*Order, error) {
 }
 
 // GetAllOrder implements OrderRepository.
-func (repo orderRepositoryDB) GetAllOrder() ([]Order, error) {
+func (repo orderRepositoryDB) GetAllOrder(user_id int) ([]Order, error) {
 	var orders []Order
-	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, created_at FROM orders"
-	if err := repo.db.Select(&orders, query); err != nil {
+	query := "SELECT order_id, customer_id, product_sku, product_cost, duration, payment_id, is_paid, created_at FROM orders where customer_id = ?"
+	if err := repo.db.Select(&orders, query, user_id); err != nil {
 		return nil, err
 	}
 	return orders, nil
+}
+
+func (repo orderRepositoryDB) UpdateOrder(entity Order) error {
+	query := `
+		UPDATE orders
+		SET product_sku=?, product_cost=?, duration=?, payment_id=?, is_paid=?
+		WHERE order_id=?
+	`
+	if _, err := repo.db.Exec(
+		query,
+		entity.ProductSKU,
+		entity.ProductCost,
+		entity.Duration,
+		entity.PaymentID,
+		entity.IsPaid,
+		entity.OrderID,
+	); err != nil {
+		return err
+	}
+	return nil
 }
